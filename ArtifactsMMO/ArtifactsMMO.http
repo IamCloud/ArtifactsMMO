@@ -1,0 +1,6 @@
+@ArtifactsMMO_HostAddress = http://localhost:5125
+
+GET {{ArtifactsMMO_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
