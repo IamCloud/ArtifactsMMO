@@ -30,12 +30,6 @@ namespace ArtifactsMMO_Controller
 
                 Csl.WriteLine($"Welcome {_accountName}! You have {origChars.Count} characters.");
                 Csl.WriteLine($"-------------------------------------------");
-                List<Map> maps = await client.GetMaps(MapContentType.Resource);
-                Csl.WriteJson(maps.FindAll((m) => m.Content != null));
-                List<Resource> resources = await client.GetResources();
-                List<Resource> targets = resources.FindAll((r) => r.Skill == "mining" && r.Level < 20);
-                targets.Sort((r1, r2) => r2.Level.CompareTo(r1.Level));
-                Resource target = targets[0];
 
                 //Utils.WriteJson(target);
                 // Map targetMap = maps.First((map) => map.Content.Code == target.Code);
@@ -103,13 +97,13 @@ namespace ArtifactsMMO_Controller
                         {
                             foreach (OriginalCharacter origChar in origChars)
                             {
-                                Loop(client, action, origChar);
+                                Loop(client, action, origChar, null);
                             }
                         }
                         else
                         {
                             OriginalCharacter origChar = origChars.First(c => c.Name == charName);
-                            Loop(client, action, origChar);
+                            Loop(client, action, origChar, null);
                         }
 
                     }
@@ -131,35 +125,72 @@ namespace ArtifactsMMO_Controller
             }
         }
 
-        private static void StartInitialLoop(GameClient client, List<OriginalCharacter> origChars)
+        private static async void StartInitialLoop(GameClient client, List<OriginalCharacter> origChars)
         {
             Csl.WriteLine("Starting loops...");
+
+
             foreach (OriginalCharacter origChar in origChars)
             {
                 if (origChar.Name == "Chopper")
                 {
-                    Loop(client, "woodcut", origChar);
+
+                    List<Resource> resources = await client.GetResources(Skill.Woodcutting, origChar.WoodcuttingLevel);
+                    resources.Sort((r1, r2) => r2.Level.CompareTo(r1.Level));
+                    Resource highestLvlResource = resources[0];
+
+                    List<Map> maps = await client.GetMaps(MapContentType.Resource, highestLvlResource.Code);
+                    Dictionary<string, string> pos = new Dictionary<string, string>();
+                    pos.Add("x", maps[0].X.ToString());
+                    pos.Add("y", maps[0].Y.ToString());
+                    Loop(client, "woodcut", origChar, pos);
                 }
                 else if (origChar.Name == "JayRemy")
                 {
-                    Loop(client, "alch", origChar);
+                    List<Resource> resources = await client.GetResources(Skill.Alchemy, origChar.AlchemyLevel);
+                    resources.Sort((r1, r2) => r2.Level.CompareTo(r1.Level));
+                    Resource highestLvlResource = resources[0];
+
+                    List<Map> maps = await client.GetMaps(MapContentType.Resource, highestLvlResource.Code);
+                    Dictionary<string, string> pos = new Dictionary<string, string>();
+                    pos.Add("x", maps[0].X.ToString());
+                    pos.Add("y", maps[0].Y.ToString());
+                    Loop(client, "alch", origChar, pos);
                 }
                 else if (origChar.Name == "JulieNgov")
                 {
-                    Loop(client, "alch", origChar);
+                    List<Resource> resources = await client.GetResources(Skill.Fishing, origChar.FishingLevel);
+                    resources.Sort((r1, r2) => r2.Level.CompareTo(r1.Level));
+                    Resource highestLvlResource = resources[0];
+
+                    List<Map> maps = await client.GetMaps(MapContentType.Resource, highestLvlResource.Code);
+                    Dictionary<string, string> pos = new Dictionary<string, string>();
+                    pos.Add("x", maps[0].X.ToString());
+                    pos.Add("y", maps[0].Y.ToString());
+                    Loop(client, "fish", origChar, pos);
+                    //Loop(client, "alch", origChar, null);
                 }
                 else if (origChar.Name == "Vicent")
                 {
-                    Loop(client, "fight", origChar);
+                    Loop(client, "fight", origChar, null);
                 }
                 else if (origChar.Name == "Marquise")
                 {
-                    Loop(client, "mine", origChar);
+                    List<Resource> resources = await client.GetResources(Skill.Mining, origChar.MiningLevel);
+                    resources.Sort((r1, r2) => r2.Level.CompareTo(r1.Level));
+                    Resource highestLvlResource = resources[0];
+
+                    List<Map> maps = await client.GetMaps(MapContentType.Resource, highestLvlResource.Code);
+                    Dictionary<string, string> pos = new Dictionary<string, string>();
+                    pos.Add("x", maps[0].X.ToString());
+                    pos.Add("y", maps[0].Y.ToString());
+                    Loop(client, "mine", origChar, pos);
+                    //Loop(client, "mine", origChar, null);
                 }
             }
         }
 
-        private static void Loop(GameClient client, string action, OriginalCharacter origChar)
+        private static void Loop(GameClient client, string action, OriginalCharacter origChar, Dictionary<string, string>? pos)
         {
             if (action == "cancel")
             {
@@ -168,7 +199,9 @@ namespace ArtifactsMMO_Controller
             else if (action == "woodcut")
             {
                 origChar.LoopCancelTokenSource = new CancellationTokenSource();
-                LoopAction(client, origChar, ActionType.Gathering, "x:2,y:6");
+
+
+                LoopAction(client, origChar, ActionType.Gathering, $"x:{pos["x"]},y:{pos["y"]}");
             }
             else if (action == "mine")
             {

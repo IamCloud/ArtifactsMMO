@@ -20,3 +20,10 @@ public class MapContentType
     public const string TaskMaster = "tasks_master";
     public const string Npc = "npc";
 }
+
+public class Skill {
+    public const string Woodcutting = "woodcutting";
+    public const string Mining = "mining";
+    public const string Fishing = "fishing";
+    public const string Alchemy = "alchemy";
+}

@@ -151,28 +151,24 @@ public class GameClient
             throw new Exception("No network connection available.");
         }
 
+        var queryString = string.Empty;
+        if (parameters != null)
+        {
+            var queryParts = parameters.Select(p => $"{p.Key}={p.Value}");
+            queryString = $"?{string.Join("&", queryParts)}";
+        }
+
+        var requestUri = new Uri($"{_baseUrl}{url}{queryString}");
+
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"{_baseUrl}{url}"),
+            RequestUri = requestUri,
             Headers =
         {
             { "Accept", "application/json" },
             { "Authorization", $"Bearer {_apiKey}" },
-        },
-            Content = parameters != null ? new StringContent(System.Text.Json.JsonSerializer.Serialize(parameters))
-            {
-                Headers =
-            {
-                ContentType = new MediaTypeHeaderValue("application/json")
-            }
-            } : new StringContent("")
-            {
-                Headers =
-            {
-                ContentType = new MediaTypeHeaderValue("application/json")
-            }
-            }
+        }
         };
 
         try
@@ -187,11 +183,12 @@ public class GameClient
             return null;
         }
     }
-    public async Task<List<Map>?> GetMaps(string contentType)
+    public async Task<List<Map>?> GetMaps(string contentType, string contentCode)
     {
-        //Dictionary<string, string> dict = new Dictionary<string, string>();
-        //dict.Add("content_type", contentType);
-        string? result = await GetAsync("maps", null);
+        Dictionary<string, string> pams = new Dictionary<string, string>();
+        pams.Add("content_type", contentType);
+        pams.Add("content_code", contentCode);
+        string? result = await GetAsync("maps", pams);
 
         if (result == null)
         {
@@ -203,9 +200,12 @@ public class GameClient
 
     }
 
-    public async Task<List<Resource>?> GetResources()
+    public async Task<List<Resource>?> GetResources(string skill, int level)
     {
-        string? result = await GetAsync("resources", null);
+        Dictionary<string, string> pams = new Dictionary<string, string>();
+        pams.Add("skill", skill);
+        pams.Add("max_level", level.ToString());
+        string? result = await GetAsync("resources", pams);
 
         if (result == null)
         {
