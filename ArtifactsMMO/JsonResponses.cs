@@ -58,6 +58,8 @@ public class ActionResponse
 
     public Details? Details { get; set; }
 
+    public Items? Items { get; set; }
+
     public int? HpRestored { get; set; }
 }
 
@@ -67,7 +69,7 @@ public class Details
     public List<DetailsItems> Items { get; set; } = new();
 }
 
-public class DetailsItems 
+public class DetailsItems
 {
     public string Code { get; set; } = string.Empty;
     public int Quantity { get; set; }
@@ -217,4 +219,47 @@ public class InventoryItem
     public int Slot { get; set; }
     public string Code { get; set; } = string.Empty;
     public int Quantity { get; set; }
+}
+
+public class Maps
+{
+    public List<Map> Data { get; set; } = new();
+}
+
+public class Map
+{
+    public string Name { get; set; } = string.Empty;
+    public string Skin { get; set; } = string.Empty;
+    public int X { get; set; }
+    public int Y { get; set; }
+    public ContentClass Content { get; set; } = new();
+
+    public class ContentClass
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+    }
+}
+
+public class Resources
+{
+    public List<Resource> Data { get; set; } = new();
+}
+
+public class Resource
+{
+    public string Name { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
+    public string Skill { get; set; } = string.Empty;
+
+    public int Level { get; set; }
+    public List<DropRate>? Drops { get; set; }
+
+    public class DropRate
+    {
+        public string Code { get; set; } = string.Empty;
+        public int Rate { get; set; }
+        public int MinQuantity { get; set; }
+        public int MaxQuantity { get; set; }
+    }
 }

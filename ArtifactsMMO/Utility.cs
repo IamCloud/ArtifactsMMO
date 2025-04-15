@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-public static class Utils
+public static class Csl
 {
     private static void WriteDateTime()
     {
         Console.Write(DateTime.Now.ToString("HH:mm:ss.ffff") + "| ");
     }
-    internal static void Write(string v, ConsoleColor color = ConsoleColor.Gray, bool writeDateTime = true)
+    internal static void Write(string v, ConsoleColor color = ConsoleColor.Gray, bool writeDateTime = false)
     {
         var original = Console.ForegroundColor;
         if (writeDateTime)
@@ -32,22 +32,27 @@ public static class Utils
     }
     internal static void WriteError(string v)
     {
-        Utils.WriteLine(v, ConsoleColor.Red);
+        Csl.WriteLine(v, ConsoleColor.Red);
     }
 
     internal static void WriteSuccess(string v)
     {
-        Utils.WriteLine(v, ConsoleColor.Green);
+        Csl.WriteLine(v, ConsoleColor.Green);
     }
 
     internal static void WriteWarning(string v)
     {
-        Utils.WriteLine(v, ConsoleColor.Yellow);
+        Csl.WriteLine(v, ConsoleColor.Yellow);
+    }
+
+    internal static void WriteInfo(string v)
+    {
+        Csl.WriteLine(v, ConsoleColor.Blue);
     }
 
     internal static void WriteJson(Object v)
     {
-        Utils.WriteLine(JsonConvert.SerializeObject(
+        Csl.WriteLine(JsonConvert.SerializeObject(
        v, Formatting.Indented,
        new Newtonsoft.Json.JsonConverter[] { new StringEnumConverter() }), ConsoleColor.Cyan);
     }
