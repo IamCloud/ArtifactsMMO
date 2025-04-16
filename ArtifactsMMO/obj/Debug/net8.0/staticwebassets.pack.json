@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\styles.css",
+      "PackagePath": "staticwebassets\\styles.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ArtifactsMMO.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.ArtifactsMMO.props",
+      "PackagePath": "build\\ArtifactsMMO.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.ArtifactsMMO.props",
+      "PackagePath": "buildMultiTargeting\\ArtifactsMMO.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.ArtifactsMMO.props",
+      "PackagePath": "buildTransitive\\ArtifactsMMO.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

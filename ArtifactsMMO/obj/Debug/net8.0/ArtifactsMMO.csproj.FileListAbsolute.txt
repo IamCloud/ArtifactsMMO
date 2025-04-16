@@ -33,3 +33,4 @@ C:\Coding\ArtifactsMMO\ArtifactsMMO\obj\Debug\net8.0\ArtifactsMMO.genruntimeconf
 C:\Coding\ArtifactsMMO\ArtifactsMMO\obj\Debug\net8.0\ref\ArtifactsMMO.dll
 C:\Coding\ArtifactsMMO\ArtifactsMMO\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Coding\ArtifactsMMO\ArtifactsMMO\obj\Debug\net8.0\ArtifactsMMO.sourcelink.json
+C:\Coding\ArtifactsMMO\ArtifactsMMO\bin\Debug\net8.0\ArtifactsMMO.staticwebassets.runtime.json

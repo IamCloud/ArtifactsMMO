@@ -1,11 +1,58 @@
 {
   "Version": 1,
-  "Hash": "cJh74ZT/ZLhLDDIt8WzkjbsmkAQBayG9ko6hPhIyc8E=",
+  "Hash": "v8yfOCFmtFL5Wgts45bZHbALiXn0xak/ra20fj8e7mw=",
   "Source": "ArtifactsMMO",
   "BasePath": "_content/ArtifactsMMO",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "ArtifactsMMO\\wwwroot",
+      "Source": "ArtifactsMMO",
+      "ContentRoot": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\",
+      "BasePath": "_content/ArtifactsMMO",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\index.html",
+      "SourceId": "ArtifactsMMO",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\",
+      "BasePath": "_content/ArtifactsMMO",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\styles.css",
+      "SourceId": "ArtifactsMMO",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Coding\\ArtifactsMMO\\ArtifactsMMO\\wwwroot\\",
+      "BasePath": "_content/ArtifactsMMO",
+      "RelativePath": "styles.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\styles.css"
+    }
+  ]
 }

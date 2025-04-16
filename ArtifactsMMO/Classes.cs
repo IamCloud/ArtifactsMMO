@@ -8,6 +8,10 @@ public static class ActionType
     public const string Gathering = "gathering";
     public const string Fight = "fight";
     public const string Move = "move";
+    public const string Rest = "rest";
+    public const string Crafting = "crafting";
+
+    public const string Cancel = "cancel";
 }
 
 public class MapContentType
@@ -21,9 +25,10 @@ public class MapContentType
     public const string Npc = "npc";
 }
 
-public class Skill {
+public class GatheringType {
     public const string Woodcutting = "woodcutting";
     public const string Mining = "mining";
     public const string Fishing = "fishing";
     public const string Alchemy = "alchemy";
+    public const string Cooking = "cooking";
 }

@@ -27,7 +27,7 @@ public class GameClient
         return NetworkInterface.GetIsNetworkAvailable();
     }
 
-    public async Task<ActionResponse?> CallActionAsync(string charName, string action, string data)
+    public async Task<ActionResponse?> PerformAction(string charName, string action, string data)
     {
         if (!IsNetworkAvailable())
         {
@@ -63,6 +63,11 @@ public class GameClient
         {
             HttpResponseMessage response = await _httpClient.SendAsync(request);
 
+            if (response.StatusCode == (HttpStatusCode)497)
+            {
+                Csl.WriteWarning($"{charName} inventory full doing [{action}].");
+                return null;
+            }
             if (response.StatusCode == (HttpStatusCode)490)
             {
                 Csl.WriteWarning($"{charName} move failed, already on map during [{action}].");
@@ -97,6 +102,32 @@ public class GameClient
 
             return null;
         }
+    }
+
+    public int GetCharGatherLvl(Character character, string gatheringType)
+    {
+        switch (gatheringType)
+        {
+            case GatheringType.Woodcutting:
+                return character.WoodcuttingLevel;
+            case GatheringType.Alchemy:
+                return character.AlchemyLevel;
+            case GatheringType.Fishing:
+                return character.FishingLevel;
+            case GatheringType.Mining:
+                return character.MiningLevel;
+            case GatheringType.Cooking:
+                return character.CookingLevel;
+            default:
+                return 0;
+        }
+    }
+
+
+    public bool isCharInLoop(List<OriginalCharacter> origChars, Character character)
+    {
+        OriginalCharacter? origChar = origChars.Find(o => o.Name == character.Name);
+        return origChar.LoopCancelTokenSource != null;
     }
 
     public async Task<Items?> GetAllItems(string action, string data)
@@ -200,10 +231,10 @@ public class GameClient
 
     }
 
-    public async Task<List<Resource>?> GetResources(string skill, int level)
+    public async Task<List<Resource>?> GetResources(string gahteringType, int level)
     {
         Dictionary<string, string> pams = new Dictionary<string, string>();
-        pams.Add("skill", skill);
+        pams.Add("skill", gahteringType);
         pams.Add("max_level", level.ToString());
         string? result = await GetAsync("resources", pams);
 
@@ -217,11 +248,11 @@ public class GameClient
     }
 
 
-    public void DisplayActionResponse(ActionResponse response)
+    public void LogConsoleActionResponse(ActionResponse response)
     {
         if (response == null) return;
 
-        Csl.Write($"{response.Character.Name} ", ConsoleColor.Gray, true);
+        Csl.Write($"{response.Character.Name}: ", ConsoleColor.Gray, true);
         if (response.Fight != null)
         {
             string resultText = response.Fight.Result == "win" ? "won" : "lost";
@@ -230,6 +261,7 @@ public class GameClient
             {
                 Csl.Write($"{drop.Quantity} {drop.Code}, ", ConsoleColor.Green, false);
             }
+            Csl.Write($"{response.Fight.Xp} exp, ", ConsoleColor.Gray, false);
             Csl.Write($"{response.Fight.Gold} gold. ", ConsoleColor.Gray, false);
         }
         if (response.Destination != null)
@@ -242,7 +274,7 @@ public class GameClient
         }
         if (response.Details != null)
         {
-            Csl.Write($"collected ", ConsoleColor.Gray, false);
+            Csl.Write($"gathered ", ConsoleColor.Gray, false);
             foreach (DetailsItems item in response.Details.Items)
             {
                 Csl.Write($"{item.Quantity} {item.Code}, ", ConsoleColor.Green, false); //Utils.Write($"{item.Quantity} {drop.Code}, ", ConsoleColor.Green, false);
@@ -273,7 +305,7 @@ public class GameClient
             return false;
         }
 
-        ActionResponse? moveBankResponse = await CallActionAsync(character.Name, "move", "x:4,y:1");
+        ActionResponse? moveBankResponse = await PerformAction(character.Name, "move", "x:4,y:1");
         if (moveBankResponse != null)
         {
             await Task.Delay(moveBankResponse.Cooldown.RemainingSeconds * 1000);
@@ -283,10 +315,10 @@ public class GameClient
         {
             if (item.Code != "")
             {
-                ActionResponse? bankResponse = await CallActionAsync(character.Name, "bank/deposit", $"code:{item.Code},quantity:{item.Quantity}");
+                ActionResponse? bankResponse = await PerformAction(character.Name, "bank/deposit", $"code:{item.Code},quantity:{item.Quantity}");
                 if (bankResponse != null)
                 {
-                    DisplayActionResponse(bankResponse);
+                    LogConsoleActionResponse(bankResponse);
                     await Task.Delay(bankResponse.Cooldown.RemainingSeconds * 1000);
                 }
 

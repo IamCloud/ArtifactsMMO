@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ArtifactsMMO Client</title>
+  <link rel="stylesheet" href="styles.css">
+  </style>
+</head>
+
+<body>
+  <div hx-get="/characters" hx-trigger="load, every 1s" hx-target="#characters" hx-swap="innerHTML">
+  </div>
+  <div hx-get="/character-select" hx-trigger="load" hx-target="#character-select" hx-swap="innerHTML">
+  </div>
+
+  <div id="characters">Loading...</div>
+
+  <form id="actionControls" hx-post="/perform-action" hx-trigger="submit" hx-swap="none">
+    <select name="character-select" id="character-select">
+    </select>
+    <select name="action-type" id="action-type">
+      <option value="move">Move</option>
+      <option value="fight">Fight</option>
+      <option value="craft">Crafting</option>
+      <option value="gathering">Gathering</option>
+      <option value="rest">Rest</option>
+      <option value="cancel">Cancel</option>
+    </select>
+    <select name="gathering-type" id="gathering-type">
+      <option value="woodcutting">Woodcutting</option>
+      <option value="mining">Mining</option>
+      <option value="alchemy">Alchemy</option>
+      <option value="fishing">Fishing</option>
+      
+    </select>
+    <div>
+      <input type="checkbox" id="loop" name="loop" />
+      <label for="loop">Loop ?</label>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+  <script src="https://unpkg.com/htmx.org"></script>
+</body>
+
+</html>
