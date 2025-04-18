@@ -32,3 +32,12 @@ public class GatheringType {
     public const string Alchemy = "alchemy";
     public const string Cooking = "cooking";
 }
+
+public static class LogColors
+{
+    public const string Normal = "grey";
+    public const string Info = "blue";
+    public const string Warning = "yellow";
+    public const string Error = "red";
+    public const string Success = "green";
+}

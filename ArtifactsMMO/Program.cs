@@ -65,6 +65,29 @@ namespace ArtifactsMMO_Controller
                     return Results.Text(html, "text/html");
                 });
 
+                app.MapGet("/action-type", async () =>
+                {
+                    string html = string.Join("\n", typeof(ActionType).GetFields().Select(f => $@"
+                    <option value='{f.GetValue(null)}'>{f.Name}</option>
+                    "));
+
+                    return Results.Text(html, "text/html");
+                });
+
+                app.MapGet("/gathering-type", async () =>
+                {
+                    string html = string.Join("\n", typeof(GatheringType).GetFields().Select(f => $@"
+                                    <option value='{f.GetValue(null)}'>{f.Name}</option>
+                                    "));
+
+                    return Results.Text(html, "text/html");
+                });
+
+                app.MapGet("/logs", async () =>
+                {
+                    return Results.Text(client.logs.Get(), "text/html");
+                });
+
                 app.MapPost("/perform-action", async (HttpRequest req) =>
                 {
                     var form = await req.ReadFormAsync();
@@ -80,7 +103,7 @@ namespace ArtifactsMMO_Controller
                             if (actionType == ActionType.Cancel)
                             {
                                 character.LoopCancelTokenSource.Cancel();
-                                Csl.WriteLine($"Cancelling loop for {character.Name}");
+                                client.logs.WriteLine($"Cancelling loop for {character.Name}");
                             }
                             else
                             {
@@ -92,7 +115,7 @@ namespace ArtifactsMMO_Controller
                                     }
                                     else
                                     {
-                                        Csl.WriteError($"Loop already running for {character.Name}");
+                                        Console.WriteLine($"Loop already running for {character.Name}");
                                     }
                                 }
                                 else
@@ -112,7 +135,7 @@ namespace ArtifactsMMO_Controller
                         {
                             OriginalCharacter character = origChars.First(c => c.Name == characterName);
                             character.LoopCancelTokenSource.Cancel();
-                            Csl.WriteLine($"Cancelling loop for {character.Name}");
+                            Console.WriteLine($"Cancelling loop for {character.Name}");
                         }
                         else
                         {
@@ -126,7 +149,7 @@ namespace ArtifactsMMO_Controller
                                 }
                                 else
                                 {
-                                    Csl.WriteError($"Loop already running for {character.Name}");
+                                    Console.WriteLine($"Loop already running for {character.Name}");
                                 }
                             }
                             else
@@ -147,12 +170,9 @@ namespace ArtifactsMMO_Controller
 
                 var serverTask = app.RunAsync();
 
-
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.BackgroundColor = ConsoleColor.Black;
                 if (!client.IsNetworkAvailable())
                 {
-                    Csl.WriteError("Error: No network connection available.  Please check your internet connection.");
+                    Console.WriteLine("Error: No network connection available.  Please check your internet connection.");
                     Console.WriteLine("Press any key to exit.");
                     Console.ReadKey();
                     return;
@@ -162,8 +182,8 @@ namespace ArtifactsMMO_Controller
 
 
 
-                Csl.WriteLine($"Welcome {_accountName}! You have {origChars.Count} characters.");
-                Csl.WriteLine($"-------------------------------------------");
+                Console.WriteLine($"Welcome {_accountName}! You have {origChars.Count} characters.");
+                Console.WriteLine($"-------------------------------------------");
 
                 //StartInitialLoop(client, origChars);
 
@@ -175,10 +195,10 @@ namespace ArtifactsMMO_Controller
 
                     if (commandSplit[0] == "exit")
                     {
-                        Csl.WriteLine("Cancelling loops...");
+                        Console.WriteLine("Cancelling loops...");
                         origChars.ForEach(c => c.LoopCancelTokenSource.Cancel());
-                        Csl.WriteLine("Loops canceled.");
-                        Csl.WriteLine("Goodbye!");
+                        Console.WriteLine("Loops canceled.");
+                        Console.WriteLine("Goodbye!");
                         await app.StopAsync();
                         return;
                     }
@@ -232,22 +252,22 @@ namespace ArtifactsMMO_Controller
             }
             catch (HttpRequestException ex)
             {
-                Csl.WriteError($"Error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}");
             }
             catch (System.Text.Json.JsonException ex)
             {
-                Csl.WriteError($"JSON Error: {ex.Message}");
+                Console.WriteLine($"JSON Error: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Csl.WriteError($"An error occurred: {ex.Message}");
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
 
         }
 
         private static async void StartInitialLoop(GameClient client, List<OriginalCharacter> origChars)
         {
-            Csl.WriteLine("Starting loops...");
+            Console.WriteLine("Starting loops...");
 
 
             foreach (OriginalCharacter origChar in origChars)
@@ -293,11 +313,11 @@ namespace ArtifactsMMO_Controller
                     Dictionary<string, string> pos = new Dictionary<string, string>();
                     pos.Add("x", maps[0].X.ToString());
                     pos.Add("y", maps[0].Y.ToString());
-                    LoopAction(client, origChar, ActionType.Gathering, $"x:{pos["x"]},y:{pos["y"]}");
+                    StartLoopingAction(client, origChar, ActionType.Gathering, $"x:{pos["x"]},y:{pos["y"]}");
                     break;
                 case ActionType.Fight:
                     origChar.LoopCancelTokenSource = new CancellationTokenSource();
-                    LoopAction(client, origChar, ActionType.Fight, "x:1,y:-2"); //Temporary coordinates
+                    StartLoopingAction(client, origChar, ActionType.Fight, "x:1,y:-2"); //Temporary coordinates
                     break;
                 case ActionType.Cancel:
                     origChar.LoopCancelTokenSource.Cancel();
@@ -307,7 +327,7 @@ namespace ArtifactsMMO_Controller
             }
         }
 
-        private static void LoopAction(GameClient client, OriginalCharacter origCharacter, string actionType, string actionPosition)
+        private static void StartLoopingAction(GameClient client, OriginalCharacter origCharacter, string actionType, string actionPosition)
         {
             _ = Task.Run(async () =>
             {
@@ -318,7 +338,7 @@ namespace ArtifactsMMO_Controller
 
                 if (remainingCooldown.TotalMilliseconds > 0)
                 {
-                    Csl.WriteInfo($"Waiting {remainingCooldown.TotalSeconds} seconds for {origCharacter.Name} cooldown.");
+                    client.logs.Write($"Waiting {remainingCooldown.TotalSeconds} seconds for {origCharacter.Name} cooldown.", LogColors.Info);
                     await Task.Delay((int)remainingCooldown.TotalMilliseconds);
                 }
 
@@ -350,7 +370,7 @@ namespace ArtifactsMMO_Controller
                         if (origCharacter.LoopCancelTokenSource.IsCancellationRequested)
                         {
                             origCharacter.LoopCancelTokenSource = null;
-                            Csl.WriteLine($"[{origCharacter.Name}] Loop cancelled.");
+                            Console.WriteLine($"[{origCharacter.Name}] Loop cancelled.");
                             break;
                         }
                         ActionResponse actionResponse = await client.PerformAction(origCharacter.Name, actionType, "");
@@ -383,13 +403,13 @@ namespace ArtifactsMMO_Controller
                         }
                         else
                         {
-                            Csl.WriteError($"[{origCharacter.Name}] Main loop action failed. Waiting 5 seconds and trying again.");
+                            Console.WriteLine($"[{origCharacter.Name}] Main loop action failed. Waiting 5 seconds and trying again.");
                             await Task.Delay(5000);
                         }
                     }
                     catch (Exception ex)
                     {
-                        Csl.WriteError($"[{origCharacter.Name}] Error: {ex.Message}");
+                        Console.WriteLine($"[{origCharacter.Name}] Error: {ex.Message}");
                         await Task.Delay(5000);
                     }
                 }
@@ -407,7 +427,7 @@ namespace ArtifactsMMO_Controller
         {
             if (actionPosition == $"x:{character.X},y:{character.Y}") return null;
 
-            Csl.WriteWarning($"[{origCharacter.Name}] at wrong position to do action, moving to correct position.");
+            client.logs.WriteLine($"[{origCharacter.Name}] at wrong position to do action, moving to correct position.", LogColors.Warning);
             return await client.PerformAction(origCharacter.Name, ActionType.Move, actionPosition);
         }
 

@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Net.NetworkInformation;
 using System.Net.Http.Headers;
 using System.Net;
+using System.Text;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 public class GameClient
 {
@@ -9,6 +11,7 @@ public class GameClient
     private readonly string _baseUrl = "https://api.artifactsmmo.com/"; // Correct base URL
     private readonly string? _apiKey = Environment.GetEnvironmentVariable("ARTIFACTSMMO_API_KEY"); // MAke sure
 
+    public HtmlLogs logs = new HtmlLogs();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
     {
         PropertyNameCaseInsensitive = true,
@@ -65,22 +68,22 @@ public class GameClient
 
             if (response.StatusCode == (HttpStatusCode)497)
             {
-                Csl.WriteWarning($"{charName} inventory full doing [{action}].");
+                logs.WriteLine($"{charName} inventory full doing [{action}].", LogColors.Warning);
                 return null;
             }
             if (response.StatusCode == (HttpStatusCode)490)
             {
-                Csl.WriteWarning($"{charName} move failed, already on map during [{action}].");
+                logs.WriteLine($"{charName} move failed, already on map during [{action}].", LogColors.Warning);
                 return null;
             }
             if (response.StatusCode == (HttpStatusCode)499)
             {
-                Csl.WriteWarning($"{charName} on cooldown [{action}] cancelled.");
+                logs.WriteLine($"{charName} on cooldown [{action}] cancelled.", LogColors.Warning);
                 return null;
             }
             if (response.StatusCode == (HttpStatusCode)598)
             {
-                Csl.WriteWarning($"{charName} could not {action} because of wrong location on map.");
+                logs.WriteLine($"{charName} could not {action} because of wrong location on map.", LogColors.Warning);
                 return null;
             }
 
@@ -98,7 +101,7 @@ public class GameClient
         }
         catch (HttpRequestException ex)
         {
-            Csl.WriteError($"{charName} unhandlded exception doing action: {action} with Data [{data}]. Message: {ex.Message}");
+            Console.WriteLine($"{charName} unhandlded exception doing action: {action} with Data [{data}]. Message: {ex.Message}");
 
             return null;
         }
@@ -136,7 +139,7 @@ public class GameClient
 
         if (result == null)
         {
-            Csl.WriteError($"Error retreiving items.");
+            Console.WriteLine($"Error retreiving items.");
             return null;
         }
 
@@ -151,7 +154,7 @@ public class GameClient
 
         if (result == null)
         {
-            Csl.WriteError($"Error retreiving {charName}.");
+            Console.WriteLine($"Error retreiving {charName}.");
             return null;
         }
 
@@ -168,7 +171,7 @@ public class GameClient
 
         if (result == null)
         {
-            Csl.WriteError("Error retreiving characters.");
+            Console.WriteLine("Error retreiving characters.");
             return null;
         }
 
@@ -210,7 +213,7 @@ public class GameClient
         }
         catch (HttpRequestException ex)
         {
-            Csl.WriteError($"Error retrieving data: {ex.Message} {ex}");
+            Console.WriteLine($"Error retrieving data: {ex.Message} {ex}");
             return null;
         }
     }
@@ -223,7 +226,7 @@ public class GameClient
 
         if (result == null)
         {
-            Csl.WriteError("Error retreiving maps.");
+            Console.WriteLine("Error retreiving maps.");
             return null;
         }
 
@@ -240,7 +243,7 @@ public class GameClient
 
         if (result == null)
         {
-            Csl.WriteError("Error retreiving resources.");
+            Console.WriteLine("Error retreiving resources.");
             return null;
         }
 
@@ -252,47 +255,44 @@ public class GameClient
     {
         if (response == null) return;
 
-        Csl.Write($"{response.Character.Name}: ", ConsoleColor.Gray, true);
+        logs.Open();
+        logs.Write($"{response.Character.Name}: ");
+
         if (response.Fight != null)
         {
             string resultText = response.Fight.Result == "win" ? "won" : "lost";
-            Csl.Write($"fought and {resultText}. Loot: ");
+            logs.Write($"fought and {resultText}. Loot: ");
             foreach (Drop drop in response.Fight.Drops)
             {
-                Csl.Write($"{drop.Quantity} {drop.Code}, ", ConsoleColor.Green, false);
+                logs.Write($"{drop.Quantity} {drop.Code}, ", LogColors.Success);
             }
-            Csl.Write($"{response.Fight.Xp} exp, ", ConsoleColor.Gray, false);
-            Csl.Write($"{response.Fight.Gold} gold. ", ConsoleColor.Gray, false);
+            logs.Write($"{response.Fight.Xp} exp, ");
+            logs.Write($"{response.Fight.Gold} gold. ");
         }
+
         if (response.Destination != null)
         {
-            Csl.Write($"moved to {response.Destination.X}, {response.Destination.Y} ");
+            logs.Write($"moved to {response.Destination.X}, {response.Destination.Y} ");
         }
+
         if (response.HpRestored != null)
         {
-            Csl.Write($"healed for {response.HpRestored} health. ", ConsoleColor.Green, false);
+            logs.Write($"healed for {response.HpRestored} health.", LogColors.Success);
         }
+
         if (response.Details != null)
         {
-            Csl.Write($"gathered ", ConsoleColor.Gray, false);
+            logs.Write($"gathered ");
             foreach (DetailsItems item in response.Details.Items)
             {
-                Csl.Write($"{item.Quantity} {item.Code}, ", ConsoleColor.Green, false); //Utils.Write($"{item.Quantity} {drop.Code}, ", ConsoleColor.Green, false);
+                logs.Write($"{item.Quantity} {item.Code}, ", LogColors.Success);
             }
-            Csl.Write($"and gained {response.Details.Xp} exp. ", ConsoleColor.Gray, false);
+            logs.Write($"and gained {response.Details.Xp} exp. ");
         }
 
-        Csl.WriteLine($"Cooldown: {response.Cooldown.RemainingSeconds} secs.", ConsoleColor.Blue, false);
+        logs.Write($"Cooldown: {response.Cooldown.RemainingSeconds} secs.", LogColors.Info);
 
-        if (response.Cooldown.RemainingSeconds > 0)
-        {
-            // Call function async after remaining seconds
-            /*Task.Delay(response.Cooldown.RemainingSeconds * 1000).ContinueWith((task) =>
-            {
-                Utils.Write($"{response.Character.Name}'s cooldown finished.");
-            });*/
-
-        }
+        logs.Close();
     }
 
 
@@ -301,7 +301,7 @@ public class GameClient
         Character? character = await GetCharacter(characterName);
         if (character == null)
         {
-            Csl.WriteError($"Error retreiving character[{characterName}]");
+            Console.WriteLine($"Error retreiving character[{characterName}]");
             return false;
         }
 
@@ -335,11 +335,11 @@ public class GameClient
         bool response = await BankAll(characterName);
         if (response == true)
         {
-            Csl.WriteSuccess($"Banked all items for {characterName}");
+            logs.WriteLine($"Banked all items for {characterName}", LogColors.Info);
         }
         else
         {
-            Csl.WriteError($"Failed to bank all items for {characterName}");
+            Console.WriteLine($"Failed to bank all items for {characterName}");
         }
 
         return true;
