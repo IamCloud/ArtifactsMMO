@@ -15,7 +15,7 @@
 <body>
   <div class="mainContainer">
     <div>
-      <div hx-get="/characters" hx-trigger="load" hx-target="#characters" hx-swap="outerHTML">        
+      <div hx-get="/characters" hx-trigger="load" hx-target="#characters" hx-swap="outerHTML">
       </div>
       <div hx-get="/character-select" hx-trigger="load" hx-target="#character-select" hx-swap="innerHTML">
       </div>
@@ -23,35 +23,51 @@
       </div>
       <div hx-get="/gathering-type" hx-trigger="load" hx-target="#gathering-type" hx-swap="innerHTML">
       </div>
+      <div hx-get="/items" hx-trigger="load" hx-target="#items" hx-swap="innerHTML">
+      </div>
 
-      <sl-card id="characters" class='card-header'>
-      </sl-card>
+      <sl-tab-group placement="start">
+        <sl-tab slot="nav" panel="dashboard">Dashboard</sl-tab>
+        <sl-tab slot="nav" panel="items">Items</sl-tab>
+        <sl-tab slot="nav" panel="map" disabled>Map</sl-tab>
 
-      <form id="actionControls" hx-post="/perform-action" hx-trigger="submit" hx-swap="none">
-        <sl-select name="character-select" id="character-select" placeholder="Select character">
-        </sl-select>
-        <sl-select name="action-type" id="action-type" placeholder="Select action">
-        </sl-select>
-        <sl-select name="gathering-type" id="gathering-type" placeholder="Select gathering">
-        </sl-select>
+        <sl-tab-panel name="dashboard">
+          <sl-card id="characters" class='card-header'>
+          </sl-card>
+          <form id="actionControls" hx-post="/perform-action" hx-trigger="submit" hx-swap="none">
+            <sl-select name="character-select" id="character-select" placeholder="Select character">
+            </sl-select>
+            <sl-select name="action-type" id="action-type" placeholder="Select action">
+            </sl-select>
+            <sl-select name="gathering-type" id="gathering-type" placeholder="Select gathering">
+            </sl-select>
 
-        <div>
-          <input type="checkbox" id="loop" name="loop" checked />
-          <label for="loop">Loop ?</label>
-        </div>
+            <div>
+              <input type="checkbox" id="loop" name="loop" checked />
+              <label for="loop">Loop ?</label>
+            </div>
 
-        <sl-button type="submit">Submit</sl-button>
-      </form>
+            <sl-button type="submit">Submit</sl-button>
+          </form>
+        </sl-tab-panel>
+
+        <sl-tab-panel name="items">
+          <div id="items" class="items">
+          </div>
+        </sl-tab-panel>
+      </sl-tab-group>
+
+
     </div>
+
     <div class="log-container">
       <div name="logs" id="logs" hx-get="/logs" hx-trigger="load, every 1s" hx-swap="innerHTML">
       </div>
     </div>
-  </div>
 
-  <script src="https://unpkg.com/htmx.org@2.0.4"
-    integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
-    crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"></script>
 </body>
 
 </html>

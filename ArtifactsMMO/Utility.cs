@@ -7,12 +7,18 @@ using Newtonsoft.Json.Converters;
 
 public class HtmlLogs
 {
+    private const int MaxLogCount = 200;
     private string _currLog = "";
-    private StringBuilder _logs = new StringBuilder();
+    private List<string> _logs = new List<string>();
 
     public string Get()
     {
-        return _logs.ToString();
+        StringBuilder sb = new StringBuilder();
+        foreach (string log in _logs)
+        {
+            sb.AppendLine(log);
+        }
+        return sb.ToString();
     }
 
     public void Write(string v, string? color = null)
@@ -43,6 +49,12 @@ public class HtmlLogs
     public void Close()
     {
         _currLog += "</div>";
+
+        if (_logs.Count > MaxLogCount)
+        {
+            _logs.RemoveAt(_logs.Count - 1);
+        }
+
         _logs.Insert(0, _currLog);
     }
 }

@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Diagnostics.Eventing.Reader;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
@@ -6,6 +7,7 @@ namespace ArtifactsMMO_Controller
 {
     public class Program
     {
+        private static readonly string _fightPos = "x:0,y:-1";
 
         public static async Task Main(string[] args)
         {
@@ -36,7 +38,7 @@ namespace ArtifactsMMO_Controller
                         string hxVals = $"hx-vals='{{\"charName\": \"{c.Name}\"}}'";
                         sb.AppendLine($@"
                         <sl-card id='characters' class='card-header'>
-                            <div slot='header' style='text-align:center'>{c.Name} <img src='{_imagesUrl}/characters/{c.Skin}.png' style='width:20px' /></div>  
+                            <div slot='header' style='text-align:center'><div>{c.Name}</div> <img src='{_imagesUrl}/characters/{c.Skin}.png' style='width:20px' /></div>  
                             <div {hxVals} hx-get='/characters-dynamic' hx-trigger='load, every 1s' hx-swap='innerHTML'></div>                                                              
                         </sl-card>");
                     }
@@ -56,8 +58,8 @@ namespace ArtifactsMMO_Controller
                     int percentHp = (int)Math.Round(percentHpDecimal * 100);
                     sb.AppendLine($@"<sl-progress-bar value='{percentHp}' class='progress-bar-values'>{percentHp}%</sl-progress-bar>
                                             <p><strong>Looping?</strong> {isLooping}
-                                                <span style='cursor:pointer;color:red;{(isLooping ? "" : "display:none")}'>
-                                                    <sl-icon name='x-circle' hx-trigger='click' hx-post='/perform-action' hx-swap='none' hx-vals='{{ ""character-select"": ""{c.Name}"", ""action-type"": ""{ActionType.Cancel}"" }}'></sl-icon>
+                                                <span style='color:red;{(isLooping ? "" : "display:none")}'>
+                                                    <sl-icon-button name='x-circle' hx-trigger='click' hx-post='/perform-action' hx-swap='none' hx-vals='{{ ""character-select"": ""{c.Name}"", ""action-type"": ""{ActionType.Cancel}"" }}'></sl-icon-button>
                                                 </span></p>
                                             <p><strong>Combat lvl:</strong> {c.Level}</p>
                                             <p><strong>XP:</strong> {c.Xp} / {c.MaxXp}</p>
@@ -106,6 +108,36 @@ namespace ArtifactsMMO_Controller
                 app.MapGet("/logs", async () =>
                 {
                     return Results.Text(client.logs.Get(), "text/html");
+                });
+
+                app.MapGet("/items", async (HttpRequest req) =>
+                {
+                    Items items = await client.GetItems();
+
+                    var sb = new System.Text.StringBuilder();
+                    foreach (ItemData i in items.Data)
+                    {
+                        sb.AppendLine($@"
+                        <sl-card id='items' class='card-header'>
+                            <div slot='header' style='text-align:center'>{i.Name} {i.Level}<img src='{_imagesUrl}/items/{i.Code}.png' style='width:20px' /></div>                             
+                        ");
+
+                        if (i.Craft != null)
+                        {
+                            sb.AppendLine($@"
+                                <div>{i.Craft.Skill} [{i.Craft.Level}]</div>
+                            ");
+                        }
+
+
+                        sb.AppendLine($@"<div slot='footer' style='text-align:center'>{i.Description}</div>                                                             
+                        </sl-card>");
+                    }
+
+                    var html = sb.ToString();
+
+
+                    return Results.Text(html, "text/html");
                 });
 
                 app.MapPost("/perform-action", async (HttpRequest req) =>
@@ -337,7 +369,18 @@ namespace ArtifactsMMO_Controller
                     break;
                 case ActionType.Fight:
                     origChar.LoopCancelTokenSource = new CancellationTokenSource();
-                    StartLoopingAction(client, origChar, ActionType.Fight, "x:0,y:-1"); //Temporary coordinates
+                    StartLoopingAction(client, origChar, ActionType.Fight, _fightPos); //Temporary coordinates
+                    break;
+                case ActionType.Crafting:
+                    origChar.LoopCancelTokenSource = new CancellationTokenSource();
+
+                    Dictionary<string, string> pams = new Dictionary<string, string>();
+                    pams.Add("craft_skill", "woodcutting");
+                    pams.Add("max_level", origChar.WoodcuttingLevel.ToString());
+                    Items items = await client.GetItems(pams);
+                    string itemCode = items.Data.Last().Code;
+                    //Map map = maps.Find(m => m.Content.Type == MapContentType.Resource && m.Content.Code == itemCode);
+                    //StartLoopingAction(client, origChar, ActionType.Crafting, _craftingPos);
                     break;
                 case ActionType.Cancel:
                     origChar.LoopCancelTokenSource.Cancel();

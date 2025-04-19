@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArtifactsMMO")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0fd449c493ca7119e0e8ba6213089bb11339a041")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+781952c63e9865cd238d24d2ba1afbea9191195f")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArtifactsMMO")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ArtifactsMMO")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

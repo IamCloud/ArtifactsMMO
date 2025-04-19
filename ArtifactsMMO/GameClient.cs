@@ -133,9 +133,9 @@ public class GameClient
         return origChar.LoopCancelTokenSource != null;
     }
 
-    public async Task<Items?> GetAllItems(string action, string data)
+    public async Task<Items?> GetItems(Dictionary<string, string>? pams = null)
     {
-        string? result = await GetAsync($"items", null);
+        string? result = await GetAsync($"items", pams);
 
         if (result == null)
         {
