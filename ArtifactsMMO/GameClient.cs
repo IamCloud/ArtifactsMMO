@@ -261,13 +261,14 @@ public class GameClient
         if (response.Fight != null)
         {
             string resultText = response.Fight.Result == "win" ? "won" : "lost";
-            logs.Write($"fought and {resultText}. Loot: ");
+            logs.Write($"fought and ");
+            logs.Write($"{resultText} ", response.Fight.Result == "win" ? LogColors.Success : LogColors.Error);
             foreach (Drop drop in response.Fight.Drops)
             {
                 logs.Write($"{drop.Quantity} {drop.Code}, ", LogColors.Success);
             }
-            logs.Write($"{response.Fight.Xp} exp, ");
-            logs.Write($"{response.Fight.Gold} gold. ");
+            logs.Write($"{response.Fight.Xp} <sl-icon name='chevron-double-up'></sl-icon>, ");
+            logs.Write($"{response.Fight.Gold} <sl-icon name='coin'></sl-icon>. ");
         }
 
         if (response.Destination != null)
@@ -277,7 +278,8 @@ public class GameClient
 
         if (response.HpRestored != null)
         {
-            logs.Write($"healed for {response.HpRestored} health.", LogColors.Success);
+            logs.Write($" Rest. {response.HpRestored}");
+            logs.Write($" <sl-icon name='heart-fill'></sl-icon>", "pink");
         }
 
         if (response.Details != null)
@@ -287,10 +289,11 @@ public class GameClient
             {
                 logs.Write($"{item.Quantity} {item.Code}, ", LogColors.Success);
             }
-            logs.Write($"and gained {response.Details.Xp} exp. ");
+            logs.Write($"and gained {response.Details.Xp} ");
+            logs.Write($"<sl-icon name='chevron-double-up'></sl-icon>");
         }
-
-        logs.Write($"Cooldown: {response.Cooldown.RemainingSeconds} secs.", LogColors.Info);
+        logs.Write($" {response.Cooldown.RemainingSeconds} ");
+        logs.Write($"<sl-icon name='hourglass'></sl-icon>.", LogColors.Info);
 
         logs.Close();
     }

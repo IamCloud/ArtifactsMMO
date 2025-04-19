@@ -1,55 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html class="sl-theme-dark">
 
 <head>
   <title>ArtifactsMMO Client</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.css" />
+
+  <script type="module"
+    src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+
   <link rel="stylesheet" href="styles.css">
   </style>
 </head>
 
 <body>
   <div class="mainContainer">
-    <div hx-get="/characters" hx-trigger="load, every 1s" hx-target="#characters" hx-swap="innerHTML">
-    </div>
-    <div hx-get="/character-select" hx-trigger="load" hx-target="#character-select" hx-swap="innerHTML">
-    </div>
-    <div hx-get="/action-type" hx-trigger="load" hx-target="#action-type" hx-swap="innerHTML">
-    </div>
-    <div hx-get="/gathering-type" hx-trigger="load" hx-target="#gathering-type" hx-swap="innerHTML">
-    </div>
-
-    <div id="characters">Loading...</div>
-
-    <form id="actionControls" hx-post="/perform-action" hx-trigger="submit" hx-swap="none">
-      <select name="character-select" id="character-select">
-      </select>
-      <select name="action-type" id="action-type">
-      </select>
-      <select name="gathering-type" id="gathering-type">
-      </select>
-
-      <div>
-        <input type="checkbox" id="loop" name="loop" checked />
-        <label for="loop">Loop ?</label>
+    <div>
+      <div hx-get="/characters" hx-trigger="load" hx-target="#characters" hx-swap="outerHTML">        
+      </div>
+      <div hx-get="/character-select" hx-trigger="load" hx-target="#character-select" hx-swap="innerHTML">
+      </div>
+      <div hx-get="/action-type" hx-trigger="load" hx-target="#action-type" hx-swap="innerHTML">
+      </div>
+      <div hx-get="/gathering-type" hx-trigger="load" hx-target="#gathering-type" hx-swap="innerHTML">
       </div>
 
-      <button type="submit">Submit</button>
-    </form>
+      <sl-card id="characters" class='card-header'>
+      </sl-card>
 
+      <form id="actionControls" hx-post="/perform-action" hx-trigger="submit" hx-swap="none">
+        <sl-select name="character-select" id="character-select" placeholder="Select character">
+        </sl-select>
+        <sl-select name="action-type" id="action-type" placeholder="Select action">
+        </sl-select>
+        <sl-select name="gathering-type" id="gathering-type" placeholder="Select gathering">
+        </sl-select>
+
+        <div>
+          <input type="checkbox" id="loop" name="loop" checked />
+          <label for="loop">Loop ?</label>
+        </div>
+
+        <sl-button type="submit">Submit</sl-button>
+      </form>
+    </div>
     <div class="log-container">
-      <div name="logs" id="logs" hx-get="/logs" hx-trigger="load, every 1s" hx-swap="morph:innerHTML">
+      <div name="logs" id="logs" hx-get="/logs" hx-trigger="load, every 1s" hx-swap="innerHTML">
       </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/htmx.org@2.0.4"
     integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
-    crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/idiomorph@0.7.3"
-    integrity="sha384-JcorokHTL/m+D6ZHe2+yFVQopVwZ+91GxAPDyEZ6/A/OEPGEx1+MeNSe2OGvoRS9"
-    crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/idiomorph@0.7.3/dist/idiomorph-ext.min.js"
-    integrity="sha384-szktAZju9fwY15dZ6D2FKFN4eZoltuXiHStNDJWK9+FARrxJtquql828JzikODob"
     crossorigin="anonymous"></script>
 </body>
 

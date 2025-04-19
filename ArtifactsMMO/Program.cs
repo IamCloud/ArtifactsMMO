@@ -1,5 +1,6 @@
 using System.Diagnostics.Eventing.Reader;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 
 namespace ArtifactsMMO_Controller
 {
@@ -12,6 +13,8 @@ namespace ArtifactsMMO_Controller
             {
                 const string _accountName = "IamCloud";
 
+                const string _imagesUrl = "https://artifactsmmo.com/images/";
+
                 GameClient client = new GameClient();
                 List<OriginalCharacter>? origChars = await client.GetCharacters(_accountName);
 
@@ -20,35 +23,22 @@ namespace ArtifactsMMO_Controller
                 app.UseDefaultFiles();
                 app.UseStaticFiles();
 
-                app.MapGet("/characters", async () =>
+                _ = app.MapGet("/characters", async () =>
                 {
                     List<OriginalCharacter>? allChars = await client.GetCharacters(_accountName);
                     var sb = new System.Text.StringBuilder();
                     foreach (var c in allChars)
                     {
                         bool isLooping = client.isCharInLoop(origChars, c);
-                        sb.AppendLine("<div class='character'>");
-                        sb.AppendLine($@"
-                                        <h2>{c.Name}</h2>
-                                        <progress max='{c.MaxHp}' value='{c.Hp}'></progress>
-                                        <p><strong>Looping?</strong> {isLooping}</p>
-                                        <p><strong>Combat lvl:</strong> {c.Level}</p>
-                                        <p><strong>XP:</strong> {c.Xp} / {c.MaxXp}</p>
-                                        <p><strong>Gold:</strong> {c.Gold}</p>                                        
-                                        <p><strong>Coords:</strong> ({c.X}, {c.Y})</p>
-                                        <p><strong>Woodcutting:</strong> Lv. {c.WoodcuttingLevel}</p>
-                                        <p><strong>Alchemy:</strong> Lv. {c.AlchemyLevel}</p>
-                                        <p><strong>Fishing:</strong> Lv. {c.FishingLevel}</p>
-                                        <p><strong>Mining:</strong> Lv. {c.MiningLevel}</p>
-                                    ");
-                        if (isLooping)
-                        {
-                            sb.AppendLine($@"<div>
-                                            <button hx-post='/perform-action' hx-swap='none' hx-vals='{{ ""character-select"": ""{c.Name}"", ""action-type"": ""{ActionType.Cancel}"" }}'>Cancel loop</button>
-                                        </div>");
-                        }
+                        double percentHpDecimal = (double)c.Hp / (double)c.MaxHp;
+                        int percentHp = (int)Math.Round(percentHpDecimal * 100);
 
-                        sb.AppendLine("</div>");
+                        string hxVals = $"hx-vals='{{\"charName\": \"{c.Name}\"}}'";
+                        sb.AppendLine($@"
+                        <sl-card id='characters' class='card-header'>
+                            <div slot='header' style='text-align:center'>{c.Name} <img src='{_imagesUrl}/characters/{c.Skin}.png' style='width:20px' /></div>  
+                            <div {hxVals} hx-get='/characters-dynamic' hx-trigger='load, every 1s' hx-swap='innerHTML'></div>                                                              
+                        </sl-card>");
                     }
                     var html = sb.ToString();
 
@@ -56,19 +46,49 @@ namespace ArtifactsMMO_Controller
                     return Results.Text(html, "text/html");
                 });
 
+                app.MapGet("/characters-dynamic", async (HttpRequest req) =>
+                {
+                    Character? c = await client.GetCharacter(req.Query["charName"]);
+
+                    var sb = new System.Text.StringBuilder();
+                    bool isLooping = client.isCharInLoop(origChars, c);
+                    double percentHpDecimal = (double)c.Hp / (double)c.MaxHp;
+                    int percentHp = (int)Math.Round(percentHpDecimal * 100);
+                    sb.AppendLine($@"<sl-progress-bar value='{percentHp}' class='progress-bar-values'>{percentHp}%</sl-progress-bar>
+                                            <p><strong>Looping?</strong> {isLooping}
+                                                <span style='cursor:pointer;color:red;{(isLooping ? "" : "display:none")}'>
+                                                    <sl-icon name='x-circle' hx-trigger='click' hx-post='/perform-action' hx-swap='none' hx-vals='{{ ""character-select"": ""{c.Name}"", ""action-type"": ""{ActionType.Cancel}"" }}'></sl-icon>
+                                                </span></p>
+                                            <p><strong>Combat lvl:</strong> {c.Level}</p>
+                                            <p><strong>XP:</strong> {c.Xp} / {c.MaxXp}</p>
+                                            <p><strong>Gold:</strong> {c.Gold}</p>                                        
+                                            <p><strong>Coords:</strong> ({c.X}, {c.Y})</p>
+                                            <p><strong>Woodcutting:</strong> Lv. {c.WoodcuttingLevel}</p>
+                                            <p><strong>Alchemy:</strong> Lv. {c.AlchemyLevel}</p>
+                                            <p><strong>Fishing:</strong> Lv. {c.FishingLevel}</p>
+                                            <p><strong>Mining:</strong> Lv. {c.MiningLevel}</p>");
+
+                    var html = sb.ToString();
+
+
+                    return Results.Text(html, "text/html");
+                });
+
+
+
                 app.MapGet("/character-select", async () =>
                 {
                     string html = string.Join("\n", origChars.Select(c => $@"
-                    <option value='{c.Name}'>{c.Name}</option>
+                    <sl-option value='{c.Name}'>{c.Name}</sl-option>
                     "));
-                    html += $"\n<option value='All'>All</option>";
+                    html += $"\n<sl-option value='All'>All</sl-option>";
                     return Results.Text(html, "text/html");
                 });
 
                 app.MapGet("/action-type", async () =>
                 {
                     string html = string.Join("\n", typeof(ActionType).GetFields().Select(f => $@"
-                    <option value='{f.GetValue(null)}'>{f.Name}</option>
+                    <sl-option value='{f.GetValue(null)}'>{f.Name}</sl-option>
                     "));
 
                     return Results.Text(html, "text/html");
@@ -77,7 +97,7 @@ namespace ArtifactsMMO_Controller
                 app.MapGet("/gathering-type", async () =>
                 {
                     string html = string.Join("\n", typeof(GatheringType).GetFields().Select(f => $@"
-                                    <option value='{f.GetValue(null)}'>{f.Name}</option>
+                                    <sl-option value='{f.GetValue(null)}'>{f.Name}</sl-option>
                                     "));
 
                     return Results.Text(html, "text/html");
@@ -317,7 +337,7 @@ namespace ArtifactsMMO_Controller
                     break;
                 case ActionType.Fight:
                     origChar.LoopCancelTokenSource = new CancellationTokenSource();
-                    StartLoopingAction(client, origChar, ActionType.Fight, "x:1,y:-2"); //Temporary coordinates
+                    StartLoopingAction(client, origChar, ActionType.Fight, "x:0,y:-1"); //Temporary coordinates
                     break;
                 case ActionType.Cancel:
                     origChar.LoopCancelTokenSource.Cancel();

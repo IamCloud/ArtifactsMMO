@@ -17,7 +17,7 @@ public class HtmlLogs
 
     public void Write(string v, string? color = null)
     {
-        if (color == null) color = "gray";
+        if (color == null) color = "light-gray";
         _currLog += $"<span style='color: {color}'>{v}</span>";
     }
 
